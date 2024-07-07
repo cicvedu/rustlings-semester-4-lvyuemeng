@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -25,7 +24,7 @@ where
             count: 0,
             items: vec![T::default()],
             comparator,
-        }
+        }   
     }
 
     pub fn len(&self) -> usize {
@@ -38,6 +37,9 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        self.items.push(value);
+        self.heapify_up(self.count);
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,9 +60,43 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if right <= self.count {
+            if (self.comparator)(&self.items[left], &self.items[right]) {
+                left
+            } else {
+                right
+            }
+        } else if left <= self.count {
+            left
+        } else {
+            idx
+        }
+    }
+
+    fn heapify_up(&mut self, mut idx: usize) {
+        while idx > 1 && ((self.comparator)(&self.items[idx], &self.items[self.parent_idx(idx)])) {
+            let parent_idx = self.parent_idx(idx);
+            self.items.swap(idx, parent_idx);
+            idx = self.parent_idx(idx);
+        }
+    }
+
+    fn heapify_down(&mut self, mut idx: usize) {
+        while self.children_present(idx) {
+            let smallest_child_idx = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smallest_child_idx], &self.items[idx]) {
+                self.items.swap(idx, smallest_child_idx);
+                idx = smallest_child_idx;
+            } else {
+                break;
+            }
+        }
     }
 }
+
 
 impl<T> Heap<T>
 where
