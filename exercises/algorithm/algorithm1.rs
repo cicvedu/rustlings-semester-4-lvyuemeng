@@ -69,15 +69,54 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+	fn add_node(&mut self, node: NonNull<Node<T>>) {
+        match self.end {
+            None => self.start = Some(node),
+            Some(end_ptr) => unsafe {
+                (*end_ptr.as_ptr()).next = Some(node);
+            },
         }
-	}
+        self.end = Some(node);
+        self.length += 1;
+    }
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    where
+        T: Ord,
+    {
+        //TODO
+        let mut merged_list = LinkedList::new();
+
+        let mut ptr_a = list_a.start;
+        let mut ptr_b = list_b.start;
+
+        while let (Some(node_a), Some(node_b)) = (ptr_a, ptr_b) {
+            unsafe {
+                if (*node_a.as_ptr()).val <= (*node_b.as_ptr()).val {
+                    merged_list.add_node(node_a);
+                    ptr_a = (*node_a.as_ptr()).next;
+                } else {
+                    merged_list.add_node(node_b);
+                    ptr_b = (*node_b.as_ptr()).next;
+                }
+            }
+        }
+
+        while let Some(node_a) = ptr_a {
+            unsafe {
+                merged_list.add_node(node_a);
+                ptr_a = (*node_a.as_ptr()).next;
+            }
+        }
+
+        while let Some(node_b) = ptr_b {
+            unsafe {
+                merged_list.add_node(node_b);
+                ptr_b = (*node_b.as_ptr()).next;
+            }
+        }
+
+        merged_list
+    }
 }
 
 impl<T> Display for LinkedList<T>
